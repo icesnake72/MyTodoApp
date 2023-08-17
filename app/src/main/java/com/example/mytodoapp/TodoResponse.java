@@ -41,6 +41,6 @@ public class TodoResponse {
     @Override
     public String toString()
     {
-        return "ClassPojo [email_id = "+email_id+", nick_nake = "+nick_name+", id = "+id+"]";
+        return "ClassPojo [email_id = "+email_id+", nick_name = "+nick_name+", id = "+id+"]";
     }
 }

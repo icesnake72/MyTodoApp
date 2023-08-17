@@ -2,6 +2,7 @@ package com.example.mytodoapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebSettings;
@@ -25,7 +26,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final String BASE_URL = "http://172.30.1.29:5001";
+    private final String BASE_URL = "http://172.30.1.66:5001";
     private WebView webView;
 
     private ImageView imageView;
@@ -45,7 +46,41 @@ public class MainActivity extends AppCompatActivity {
         ws.setCacheMode(WebSettings.LOAD_DEFAULT);
 
         webView.setWebViewClient(new WebViewClient());
-        webView.loadUrl("http://172.30.1.29:5001");
+        webView.loadUrl(BASE_URL);
+    }
+
+    private void getTodos(String emailId, String user_id)
+    {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        TodoApi todoApi = retrofit.create(TodoApi.class);
+
+        // RequestData requestData = new RequestData("test@gmail.com", "1234");
+        Call<TodoResponse> call = todoApi.getTodos(emailId, user_id);
+        call.enqueue(new Callback<TodoResponse>() {
+            @Override
+            public void onResponse(Call<TodoResponse> call, Response<TodoResponse> response) {
+                if (response.isSuccessful()) {
+                    TodoResponse todoResponse = response.body();
+                    Toast toast = Toast.makeText(getApplicationContext(), todoResponse.toString(), Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+                else {
+                    Toast toast = Toast.makeText(getApplicationContext(), response.toString(), Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+            }
+
+
+            @Override
+            public void onFailure(Call<TodoResponse> call, Throwable t) {
+                Toast toast = Toast.makeText(getApplicationContext(), t.getLocalizedMessage(), Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        });
     }
 
     private void onLoginButtonClick(View view)
@@ -65,8 +100,9 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<TodoResponse> call, Response<TodoResponse> response) {
                 if (response.isSuccessful()) {
                     TodoResponse todoResponse = response.body();
-                    Toast toast = Toast.makeText(getApplicationContext(), todoResponse.toString(), Toast.LENGTH_SHORT);
-                    toast.show();
+//                    Toast toast = Toast.makeText(getApplicationContext(), todoResponse.toString(), Toast.LENGTH_SHORT);
+//                    toast.show();
+                    getTodos(todoResponse.getEmail_id(), todoResponse.getId());
                 }
                 else {
                     Toast toast = Toast.makeText(getApplicationContext(), response.toString(), Toast.LENGTH_SHORT);

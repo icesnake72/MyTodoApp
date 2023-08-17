@@ -15,4 +15,10 @@ public interface TodoApi {
     // Call<RequestData> tryLogin(@Body RequestData requestData);
     Call<TodoResponse> tryLogin(@Field("InputEmail") String emailId,
                                 @Field("InputPassword")String password);
+
+    @FormUrlEncoded
+    @POST("get_user_todos")
+        // Call<RequestData> tryLogin(@Body RequestData requestData);
+    Call<TodoResponse> getTodos(@Field("InputEmail") String emailId,
+                                @Field("InputID")String user_id);
 }
