@@ -26,8 +26,26 @@
             android:text="@string/app_name"
             android:textColor="@color/white"
             android:textSize="18sp"
-            android:gravity="center_vertical|center_horizontal"
+            android:gravity="center_vertical|start"
+            android:paddingStart="10dp"
             android:layout_weight="3"/>
+
+        <TextView
+            android:id="@+id/textViewAccount"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/login_account"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:gravity="center_vertical|end"
+            android:paddingStart="10dp"
+            android:layout_weight="3"/>
+
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:src="@drawable/baseline_account_circle_24"
+            android:scaleType="center"/>
 
         <ImageView
             android:layout_width="50dp"
@@ -36,11 +54,12 @@
             android:scaleType="center"/>
     </LinearLayout>
 
-    <WebView
-        android:id="@+id/todo_web_view"
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rcViewTodos"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="9"/>
+        android:layout_height="match_parent"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -56,6 +75,7 @@
             android:src="@drawable/baseline_home_24"
             android:background="#FF5722"
             android:scaleType="center"/>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -65,9 +85,6 @@
             android:gravity="center_vertical|start"
             android:background="#FF5722"
             android:paddingEnd="10dp"/>
-
-
-
 
     </LinearLayout>
 

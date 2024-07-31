@@ -1,23 +1,23 @@
 package com.example.mytodoapp;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
-
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -26,30 +26,56 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final String BASE_URL = "http://172.30.1.66:5001";
+    private final String BASE_URL = "http://172.30.1.22:5001";
     private WebView webView;
 
     private ImageView imageView;
+
+    private final String spValueText = "SharedPreference_Data";
+
+    private String email_id;
+    private String nick_name;
+    private String user_id;
+
+    private RecyclerView rcView;
+    private RecyclerView.Adapter adapter;
+    private RecyclerView.LayoutManager layoutManager;
+
+    private ActivityResultLauncher<Intent> launcher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        imageView = findViewById(R.id.imageViewLogin);
-        imageView.setOnClickListener(this::onLoginButtonClick);
+        SharedPreferences sp = getSharedPreferences(spValueText, Context.MODE_PRIVATE);
 
+        // 로그인 상태 확인
+        boolean isLogged = sp.getBoolean("isLogged", false);
+        if (!isLogged) {
+            // 로그인되어 있지 않으면 로그인 화면으로 이동
+            launcher = registerForActivityResult(
+                    new ActivityResultContracts.StartActivityForResult(),
+                    result -> {
+                        if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                            email_id = result.getData().getStringExtra("EMAIL_ID");
+                            nick_name = result.getData().getStringExtra("NICK_NAME");
+                            user_id = result.getData().getStringExtra("USER_ID");
 
-        webView = findViewById(R.id.todo_web_view);
-        WebSettings ws = webView.getSettings();
-        ws.setJavaScriptEnabled(true);
-        ws.setCacheMode(WebSettings.LOAD_DEFAULT);
+                            TextView textView = findViewById(R.id.textViewAccount);
+                            textView.setText(nick_name);
 
-        webView.setWebViewClient(new WebViewClient());
-        webView.loadUrl(BASE_URL);
+                            getTodos();
+                        }
+                    }
+            );
+
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            launcher.launch(intent);
+        }
     }
 
-    private void getTodos(String emailId, String user_id)
+    private void getTodos()
     {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
@@ -59,50 +85,16 @@ public class MainActivity extends AppCompatActivity {
         TodoApi todoApi = retrofit.create(TodoApi.class);
 
         // RequestData requestData = new RequestData("test@gmail.com", "1234");
-        Call<TodoResponse> call = todoApi.getTodos(emailId, user_id);
-        call.enqueue(new Callback<TodoResponse>() {
+        Call<MyTodos> call = todoApi.getTodos(email_id, user_id);
+        call.enqueue(new Callback<MyTodos>() {
             @Override
-            public void onResponse(Call<TodoResponse> call, Response<TodoResponse> response) {
+            public void onResponse(Call<MyTodos> call, Response<MyTodos> response) {
                 if (response.isSuccessful()) {
-                    TodoResponse todoResponse = response.body();
-                    Toast toast = Toast.makeText(getApplicationContext(), todoResponse.toString(), Toast.LENGTH_SHORT);
-                    toast.show();
-                }
-                else {
-                    Toast toast = Toast.makeText(getApplicationContext(), response.toString(), Toast.LENGTH_SHORT);
-                    toast.show();
-                }
-            }
-
-
-            @Override
-            public void onFailure(Call<TodoResponse> call, Throwable t) {
-                Toast toast = Toast.makeText(getApplicationContext(), t.getLocalizedMessage(), Toast.LENGTH_SHORT);
-                toast.show();
-            }
-        });
-    }
-
-    private void onLoginButtonClick(View view)
-    {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        TodoApi todoApi = retrofit.create(TodoApi.class);
-
-        // RequestData requestData = new RequestData("test@gmail.com", "1234");
-        Call<TodoResponse> call = todoApi.tryLogin("test@gmail.com", "1234");
-
-        call.enqueue(new Callback<TodoResponse>() {
-            @Override
-            public void onResponse(Call<TodoResponse> call, Response<TodoResponse> response) {
-                if (response.isSuccessful()) {
-                    TodoResponse todoResponse = response.body();
+                    MyTodos myTodos = response.body();
 //                    Toast toast = Toast.makeText(getApplicationContext(), todoResponse.toString(), Toast.LENGTH_SHORT);
 //                    toast.show();
-                    getTodos(todoResponse.getEmail_id(), todoResponse.getId());
+
+                    initTodosForUser(myTodos);
                 }
                 else {
                     Toast toast = Toast.makeText(getApplicationContext(), response.toString(), Toast.LENGTH_SHORT);
@@ -111,10 +103,22 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<TodoResponse> call, Throwable t) {
+            public void onFailure(Call<MyTodos> call, Throwable t) {
                 Toast toast = Toast.makeText(getApplicationContext(), t.getLocalizedMessage(), Toast.LENGTH_SHORT);
                 toast.show();
             }
         });
     }
+
+    private void initTodosForUser(MyTodos myTodos) {
+        rcView = findViewById(R.id.rcViewTodos);
+        rcView.setHasFixedSize(true);
+
+        layoutManager = new LinearLayoutManager(this);
+        rcView.setLayoutManager(layoutManager);
+
+        adapter = new TodoAdaptor(myTodos);
+        rcView.setAdapter(adapter);
+    }
+
 }

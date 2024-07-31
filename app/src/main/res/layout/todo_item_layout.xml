@@ -10,10 +10,12 @@
         android:orientation="horizontal">
 
         <CheckBox
+            android:id="@+id/cbDone"
             android:layout_width="30dp"
             android:layout_height="match_parent"/>
 
         <TextView
+            android:id="@+id/textViewTodo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="나의 할일"
@@ -23,12 +25,15 @@
             android:layout_weight="1"/>
 
         <ImageView
-            android:layout_width="wrap_content"
+            android:id="@+id/imageViewDelete"
+            android:layout_width="50dp"
             android:layout_height="match_parent"
             android:src="@drawable/baseline_delete_forever_24"
-            android:layout_gravity="center_vertical|end"/>
+            android:layout_gravity="center_vertical|end"
+            android:scaleType="center"/>
     </LinearLayout>
     <TextView
+        android:id="@+id/textViewCreatedTime"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:text="2023-09-01 00:00:00"

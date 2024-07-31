@@ -1,8 +1,9 @@
 <resources>
-    <string name="app_name">My TODO</string>
+    <string name="app_name">My To Do</string>
     <string name="Login">hilogin</string>
     <string name="user_email_id">사용자 이메일 아이디</string>
     <string name="user_password">비밀번호</string>
     <string name="auto_login">자동 로그인</string>
     <string name="login_button_text">로그인</string>
+    <string name="login_account">USER 님</string>
 </resources>
